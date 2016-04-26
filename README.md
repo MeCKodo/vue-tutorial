@@ -224,8 +224,7 @@ router.redirect({
               <img :src="timeEntry.user.image" class="avatar img-circle img-responsive" />
               <p class="text-center">
                 <strong>
-                  {{ timeEntry.user.firstName }}
-                  {{ timeEntry.user.lastName }}
+                  {{ timeEntry.user.name }}
                 </strong>
               </p>
             </div>
