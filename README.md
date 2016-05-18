@@ -551,3 +551,25 @@ router.map({
 
 
 > 下一章，我们将会结合node学习vue-resource，更好的完善我们SPA应用
+
+
+## 番外篇
+
+> 我看很多人都不知道如何引入bootstrap,我就在这加了一下
+
+首先npm i jquery bootstrap style-loader --save-dev;
+
+然后我修改了两个文件 第一个是 `webpack.base.conf.js` 我把module都改了
+
+最后我们在入口js文件里加三行代码
+
+`import 'jquery'`
+`import 'bootstrap/dist/css/bootstrap.css'`
+`import 'bootstrap/dist/js/bootstrap'`
+
+在npm run dev 看看页面吧! 在head里会有一个style全是bootstrap的代码.别忘了把index.html里的第三方bootstrap注释了.
+
+在我这次更新的代码里,我已经把引用第三方代码删了.
+
+
+

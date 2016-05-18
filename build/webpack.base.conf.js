@@ -2,6 +2,7 @@ var path = require('path')
 var config = require('../config')
 var cssLoaders = require('./css-loaders')
 var projectRoot = path.resolve(__dirname, '../')
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 module.exports = {
   entry: {
@@ -31,9 +32,12 @@ module.exports = {
         loader: 'vue'
       },
       {
+        test: /\.css$/,
+        loader: "style!css"
+      },
+      {
         test: /\.js$/,
         loader: 'babel',
-        include: projectRoot,
         exclude: /node_modules/
       },
       {
@@ -41,15 +45,36 @@ module.exports = {
         loader: 'json'
       },
       {
-        test: /\.html$/,
-        loader: 'vue-html'
-      },
-      {
-        test: /\.(png|jpe?g|gif|svg|woff2?|eot|ttf|otf)(\?.*)?$/,
+        test: /\.(png|jpg)$/,
         loader: 'url',
         query: {
           limit: 10000,
-          name: path.join(config.build.assetsSubDirectory, '[name].[hash:7].[ext]')
+          name: '[name].[ext]?[hash:10]'
+        }
+      },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url",
+        query: {
+          name: '[name].[ext]?mimetype=image/svg+xml'
+        }
+      },
+      {
+        test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: "url-loader?limit=10000&minetype=application/font-woff"
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url",
+        query: {
+          name: '[name].[ext]?mimetype=application/font-woff2'
+        }
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url",
+        query: {
+          name: '[name].[ext]?mimetype=application/font-woff2'
         }
       }
     ]
