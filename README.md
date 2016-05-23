@@ -814,6 +814,47 @@ app.delete('/delete/:id', function (req, res, next) {
   });
 });
 ```
+前端部分
+
+```js
+//App.vue
+ready() {
+    this.$http.get('http://localhost:8888/time')
+      .then(function(ret) {
+        this.totalTime = ret.data.time;
+      })
+      .then(function(err) {
+        console.log(err);
+      })
+},
+
+//TimeEntries.vue
+<div class="col-sm-1">
+  <button
+    class="btn btn-xs btn-danger delete-button"
+    @click="deleteTimeEntry(timeEntry)">
+    X
+  </button>
+</div>
+deleteTimeEntry (timeEntry) {
+    // 删除
+    let index = this.timeEntries.indexOf(timeEntry)
+    let _id = this.timeEntries[index]._id
+    if (window.confirm('确认删除?')) {
+      this.$http.delete('http://localhost:8888/delete/' + _id)
+        .then(function(ret) {
+          console.log(ret);
+        })
+        .then(function(err) {
+          console.log(err)
+        });
+      this.timeEntries.splice(index, 1)
+      this.$dispatch('deleteTime', timeEntry)
+    }
+}
+
+```
+
 
 ## 完结
 
@@ -830,6 +871,7 @@ app.delete('/delete/:id', function (req, res, next) {
     2.完成修改操作
 
 源码地址：https://github.com/MeCKodo/vue-tutorial
+
 
 
 
