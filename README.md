@@ -827,7 +827,22 @@ ready() {
         console.log(err);
       })
 },
-
+```
+```js
+//TimeEntries.vue
+route : {
+  data(){
+    this.$http.get('http://localhost:8888/time-entries')
+      .then(function(ret) {
+        this.timeEntries = ret.data;
+      })
+      .then(function(err) {
+        console.log(err);
+      })
+  }
+},
+```
+```js
 //TimeEntries.vue
 <div class="col-sm-1">
   <button
@@ -836,6 +851,7 @@ ready() {
     X
   </button>
 </div>
+
 deleteTimeEntry (timeEntry) {
     // 删除
     let index = this.timeEntries.indexOf(timeEntry)
@@ -871,6 +887,7 @@ deleteTimeEntry (timeEntry) {
     2.完成修改操作
 
 源码地址：https://github.com/MeCKodo/vue-tutorial
+
 
 
 
