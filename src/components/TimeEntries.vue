@@ -24,10 +24,10 @@
           <div class="row">
 
             <div class="col-sm-2 user-details">
-              <img :src="timeEntry.user.image" class="avatar img-circle img-responsive" />
+              <img src="https://avatars1.githubusercontent.com/u/10184444?v=3&s=460" class="avatar img-circle img-responsive" />
               <p class="text-center">
                 <strong>
-                  {{ timeEntry.user.name }}
+                  二哲
                 </strong>
               </p>
             </div>
@@ -81,27 +81,41 @@
 </style>
 <script>
   export default {
+    route : {
+      data(){
+        this.$http.get('http://localhost:8888/time-entries')
+          .then(function(ret) {
+            this.timeEntries = ret.data;
+          })
+          .then(function(err) {
+            console.log(err);
+          })
+      }
+    },
     data () {
       // 模拟下初始化数据
-      let existingEntry = {
-        user: {
-          name: '二哲',
-          email: 'kodo@forchange.cn',
-          image: 'https://sfault-avatar.b0.upaiyun.com/888/223/888223038-5646dbc28d530_huge256'
-        },
+      /*let existingEntry = {
         comment: '我的第一个任务',
         totalTime: 1.5,
         date: '2016-05-01'
-      }
+      }*/
       return {
-        timeEntries: [existingEntry]
+        timeEntries: []
       }
     },
     methods: {
       deleteTimeEntry (timeEntry) {
         // 删除
         let index = this.timeEntries.indexOf(timeEntry)
+        let _id = this.timeEntries[index]._id
         if (window.confirm('确认删除?')) {
+          this.$http.delete('http://localhost:8888/delete/' + _id)
+            .then(function(ret) {
+              console.log(ret);
+            })
+            .then(function(err) {
+              console.log(err)
+            });
           this.timeEntries.splice(index, 1)
           this.$dispatch('deleteTime', timeEntry)
         }

@@ -45,19 +45,28 @@
       data () {
         return {
           timeEntry: {
-            user: {
+            /*user: {
               name: '二哲',
               email: 'kodo@forchange.cn',
               image: 'https://sfault-avatar.b0.upaiyun.com/888/223/888223038-5646dbc28d530_huge256'
-            },
+            },*/
           }
         }
       },
       methods: {
         save () {
-          let timeEntry = this.timeEntry
-          this.$dispatch('timeUpdate', timeEntry)
-          this.timeEntry = {}
+          this.$http.post('http://localhost:8888/create',{
+            comment : this.timeEntry.comment,
+            totalTime : this.timeEntry.totalTime,
+            date : this.timeEntry.date
+          }).then(function(ret) {
+            console.log(ret);
+            let timeEntry = this.timeEntry
+            console.log(timeEntry);
+            this.$dispatch('timeUpdate', timeEntry)
+            this.timeEntry = {}
+          })
+
         }
       }
     }

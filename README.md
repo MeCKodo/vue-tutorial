@@ -572,4 +572,265 @@ router.map({
 在我这次更新的代码里,我已经把引用第三方代码删了.
 
 
+# (2/2)Vue构建单页应用最佳实战
+
+## 前言
+
+> 本章节，将会把所有的请求全写为跨域请求。不知道为什么，很多人一用了框架就会不知所措。给大家一个忠告，享受框架带来的便利，别忘了时刻提醒自己学好基础知识。
+
+先把一些不必要的代码删了。
+
+```js
+//TimeEntries.vue 的模拟数据代码
+data () {
+  // 模拟下初始化数据
+  /*let existingEntry = {
+    comment: '我的第一个任务',
+    totalTime: 1.5,
+    date: '2016-05-01'
+  }*/
+  return {
+    timeEntries: []
+  }
+},
+//头像和昵称暂时写死
+<div class="col-sm-2 user-details">
+  <img src="https://avatars1.githubusercontent.com/u/10184444?v=3&s=460" class="avatar img-circle img-responsive" />
+  <p class="text-center">
+    <strong>
+      二哲
+    </strong>
+  </p>
+</div>
+
+
+//LogTime.vue里的模拟数据代码
+data () {
+    return {
+      timeEntry: {
+        /*user: {
+          name: '二哲',
+          email: 'kodo@forchange.cn',
+          image: 'https://sfault-avatar.b0.upaiyun.com/888/223/888223038-5646dbc28d530_huge256'
+        },*/
+      }
+    }
+},
+```
+
+> 我们将专注3个字段的增删改查，任务时间，持续时间，备注。
+
+## 正文
+
+我们的数据交互其实很简单，所以我在这选择使用大家最熟悉的`express`和`mongodb`，在一个`app.js` 文件里完成所有的`controller`。
+
+首先，安装几个必要的包`npm i express mongodb morgan body-parser --save-dev;`
+
+简单解释下Morgan和body-parser，其实就是一个log美化和解析参数。具体大家可以google下。
+
+在我们的根目录下，创建`app.js`初始化以下代码
+
+```js
+//app.js
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
+var morgan = require('morgan');
+
+var MongoClient = require('mongodb').MongoClient;
+var mongoUrl = 'mongodb://localhost:27017/mission';
+var _db;
+
+app.use(morgan('dev'));
+app.use(bodyParser.json());
+app.use(express.static('dist'));
+
+MongoClient.connect(mongoUrl, function (err, db) {
+  if(err) {
+    console.error(err);
+    return;
+  }
+
+  console.log('connected to mongo');
+  _db = db;
+  app.listen(8888, function () {
+    console.log('server is running...');
+  });
+});
+```
+
+解释下mongoUrl这行`mongodb://localhost:27017/mission` 连接相应的端口，并且使用mission表。此时你是没有`mission`数据库的，这不用在意。在我们后续操作中，它将会自动创建一个mission数据库。
+
+上面代码的意思是，我们创建我们的一个mongo连接，当数据库连接上了后再启动我们的服务器。
+
+接着先启动我们的mongo服务。在命令行里 `sudo mongo` 。
+
+![](http://7xim8z.com1.z0.glb.clouddn.com/vue-tutorial-2-1.png)
+
+如果你用得是webstrom编辑器，可以直接运行`app.js`，如果是命令行，那就使用 `node app.js`
+
+如果看见命令行输出了 `connected to mongo` `server is running...` 就可以在`8888`端口访问我们的应用了。（在这之前别忘了build你的代码）
+
+由于我们讲得是跨域，所以我们讲在我们的dev环境下完成所有的请求。`npm run dev`
+
+关闭我们的8888端口页面，进入8080端口的开发环境。
+
+写下我们第一个创建任务的请求。
+
+```js
+//app.js
+
+//使用post方法
+app.post('/create', function(req, res, next) {
+    //接收前端发送的字段
+  var mission = req.body;
+  //选择一个表my_mission 此时没有没关系，也会自动创建
+  var collection = _db.collection('my_mission');
+    //如果我们需要的字段不存在，返回前端信息
+  if(!mission.comment || !mission.totalTime || !mission.date) {
+    res.send({errcode:-1,errmsg:"params missed"});
+    return;
+  }
+    //如果存在就插入数据库，返回OK
+  collection.insert({comment: mission.comment, totalTime: mission.totalTime,date:mission.date}, function (err, ret) {
+    if(err) {
+      console.error(err);
+      res.status(500).end();
+    } else {
+      res.send({errcode:0,errmsg:"ok"});
+    }
+  });
+});
+```
+
+修改下我们的`LogTime.vue`
+
+```js
+//LogTime.vue
+<button class="btn btn-primary" @click="save()">保存</button>
+
+methods: {
+    save () {
+      this.$http.post('http://localhost:8888/create',{
+        comment : this.timeEntry.comment,
+        totalTime : this.timeEntry.totalTime,
+        date : this.timeEntry.date
+      }).then(function(ret) {
+        console.log(ret);
+        let timeEntry = this.timeEntry
+        console.log(timeEntry);
+        this.$dispatch('timeUpdate', timeEntry)
+        this.timeEntry = {}
+      })
+    }
+}
+
+```
+
+输入好内容，点击保存按钮，会发现报了个错。这其实就是最常见的跨域请求错误。
+
+![](http://7xim8z.com1.z0.glb.clouddn.com/vue-tutorial-2-2.png)
+![](http://7xim8z.com1.z0.glb.clouddn.com/vue-tutorial-2-3.png)
+但是我们明明写得是`post`请求为什么显示得是`options`呢？
+
+这其实是跨域请求前会先发起的一个`options`请求，需要先问问服务端，我需要一些操作可以吗？如果服务端那里是允许的，才会继续让你发送`post`请求。
+
+我不知道那些使用`vue-resource`各种姿势也想满足跨域请求的人是怎么想的。想上天吗？
+
+所以我们需要服务端配置，而不是前端。
+
+```js
+//app.js
+app.all("*", function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
+  res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+  if (req.method == 'OPTIONS') {
+    res.send(200);
+  } else {
+    next();
+  }
+});
+
+```
+
+`Access-Control-Allow-Origin`是设置你的来源域名，写`*`是很危险的操作。所以我们可以直接写成我们所需的域名和端口，别人就没法请求了。
+
+另外几行就不解释了，一看就懂。
+
+不出意外，可以发现发送了options后，马上发送了post，然后就创建成功了。看下mongo的表，也多了一条记录。
+
+接着来让我们一口气写完剩下的三个请求。列表渲染，删除计划，获取总时长。
+
+```js
+//app.js
+var ObjectID = require('mongodb').ObjectID
+
+//获取总时长
+app.get('/time', function(req, res, next) {
+    //获取数据表
+  var collection = _db.collection('my_mission');
+  var time = 0;
+  //查询出所有计划
+  collection.find({}).toArray(function (err, ret) {
+    if(err) {
+      console.error(err);
+      return;
+    }
+    //所有计划累加时长
+    ret.forEach(function (item, index) {
+      time += +item.totalTime;
+    });
+    //返回时长
+    res.json({errcode:0,errmsg:"ok",time:time});
+  });
+});
+
+//获取列表
+app.get('/time-entries', function(req, res, next) {
+  var collection = _db.collection('my_mission');
+  collection.find({}).toArray(function (err, ret) {
+    if(err) {
+      console.error(err);
+      return;
+    }
+    res.json(ret);
+  });
+});
+
+//删除计划
+app.delete('/delete/:id', function (req, res, next) {
+  var _id = req.params.id;
+  var collection = _db.collection('my_mission');
+  console.log(_id)
+  //使用mongodb的唯一ObjectId字段查找出对应id删除记录
+  collection.remove({_id: new ObjectID(_id)} ,function (err, result) {
+    if(err) {
+      console.error(err);
+      res.status(500).end();
+    } else {
+      res.send({errcode:0,errmsg:"ok"});
+    }
+  });
+});
+```
+
+## 完结
+
+到此，我们就将我们整个应用完成了。新增创建删除都可用了。
+
+本来还想有上传头像等，那样觉得更多的是偏后端教学。既然我们是vue的简单入门教程就不过多介绍。
+
+本系列让大家轻松的了解学习了vue,vue-router,vue-resource,express,mongodb的运用。
+
+还是那句话，享受框架带来便利的同时，别忘了加强基础的训练。基本功才是真正的王道啊。玩电竞的玩家一定深有体会。
+
+> 最后给有兴趣的同学留下两个简单的作业
+    1.完成头像昵称的字段
+    2.完成修改操作
+
+源码地址：https://github.com/MeCKodo/vue-tutorial
+
+
+
 

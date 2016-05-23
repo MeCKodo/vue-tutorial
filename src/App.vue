@@ -27,9 +27,18 @@
 
   export default {
     components: { Sidebar },
+    ready() {
+        this.$http.get('http://localhost:8888/time')
+          .then(function(ret) {
+            this.totalTime = ret.data.time;
+          })
+          .then(function(err) {
+            console.log(err);
+          })
+    },
     data () {
       return {
-        totalTime: 1.5
+        totalTime: 0
       }
     },
     events: {
