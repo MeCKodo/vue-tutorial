@@ -6,17 +6,17 @@
         <input
           type="date"
           class="form-control"
-          v-model="timeEntry.date"
-          placeholder="日期"
+          v-model="date"
+          placeholder="Date"
         />
       </div>
       <div class="col-sm-6">
-        <label>所需时间</label>
+        <label>时间</label>
         <input
           type="number"
           class="form-control"
-          v-model="timeEntry.totalTime"
-          placeholder="所需时间"
+          v-model="totalTime"
+          placeholder="Hours"
         />
       </div>
     </div>
@@ -26,13 +26,13 @@
         <input
           type="text"
           class="form-control"
-          v-model="timeEntry.comment"
-          placeholder="备注"
+          v-model="comment"
+          placeholder="Comment"
         />
       </div>
     </div>
     <button class="btn btn-primary" @click="save()">保存</button>
-    <button v-link="'/time-entries'" class="btn btn-danger">取消</button>
+    <router-link to="/time-entries" class="btn btn-danger">取消</router-link>
     <hr>
   </div>
 </template>
@@ -41,33 +41,28 @@
 </style>
 <script>
 
-    export default{
-      data () {
-        return {
-          timeEntry: {
-            /*user: {
-              name: '二哲',
-              email: 'kodo@forchange.cn',
-              image: 'https://sfault-avatar.b0.upaiyun.com/888/223/888223038-5646dbc28d530_huge256'
-            },*/
+    export default {
+        name : 'LogTime',
+        data() {
+            return {
+                date : '',
+                totalTime : '',
+                comment : ''
+            }
+        },
+        methods:{
+          save() {
+            const plan = {
+              name : '二哲',
+              image : 'https://sfault-avatar.b0.upaiyun.com/888/223/888223038-5646dbc28d530_huge256',
+              date : this.date,
+              totalTime : this.totalTime,
+              comment : this.comment
+            };
+            this.$store.dispatch('savePlan', plan)
+            this.$store.dispatch('addTotalTime', this.totalTime)
+            this.$router.go(-1)
           }
         }
-      },
-      methods: {
-        save () {
-          this.$http.post('http://localhost:8888/create',{
-            comment : this.timeEntry.comment,
-            totalTime : this.timeEntry.totalTime,
-            date : this.timeEntry.date
-          }).then(function(ret) {
-            console.log(ret);
-            let timeEntry = this.timeEntry
-            console.log(timeEntry);
-            this.$dispatch('timeUpdate', timeEntry)
-            this.timeEntry = {}
-          })
-
-        }
-      }
     }
 </script>

@@ -10,9 +10,13 @@
 
   </div>
 </template>
-
 <script>
-  export default {
-    props: ['time']
-  }
+    export default {
+      name : 'Sidebar',
+      computed: {
+        time() {
+          return this.$store.state.totalTime
+        }
+      }
+    }
 </script>

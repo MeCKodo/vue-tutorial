@@ -1,33 +1,60 @@
 import Vue from 'vue'
-import App from './App.vue'
-import Home from './components/Home.vue'
+import VueRouter from 'vue-router'
+import store from './store'
+import App from './App'
+import Home from './components/Home'
 import TimeEntries from './components/TimeEntries.vue'
 import LogTime from './components/LogTime.vue'
-import VueRouter from 'vue-router'
+import NotFound from './components/404'
 import VueResource from 'vue-resource'
 import 'bootstrap/dist/css/bootstrap.css'
 
-Vue.use(VueResource)
 Vue.use(VueRouter)
+Vue.use(VueResource)
 
-const router = new VueRouter()
+const routes = [{
+  path : '/',
+  component : Home
+},{
+  path : '/home',
+  component : Home
+},{
+  path : '/time-entries',
+  component : TimeEntries,
+  children : [{
+    path : 'log-time',
+    component : LogTime,
+  }]
+},{
+  path : '*',
+  component : NotFound
+}];
 
-router.map({
-  '/Home': {
-    component: Home
-  },
-  '/time-entries': {
-    component: TimeEntries,
-    subRoutes: {
-      '/log-time': {
-        component: LogTime
-      }
-    }
-  }
-})
+const router = new VueRouter({
+  routes
+});
 
-router.redirect({
-  '*': '/Home'
-})
+/* eslint-disable no-new */
+// 这灵活得亮瞎了
+/*new Vue({
+  el: '#app',
+  template: '<App/>',
+  router,
+  components: { App }
+});
 
-router.start(App, '#app')
+ new Vue(Vue.util.extend({
+   router
+ }, App)).$mount('#app');
+
+new Vue({
+  el:'#app',
+  router,
+  render:h => h(App)
+});*/
+var app = new Vue({
+  el: '#app',
+  router,
+  store,
+  ...App,
+});
