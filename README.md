@@ -1,15 +1,21 @@
 ## 前言
 
-我们将会选择使用一些vue周边的库`vue-cli`, `vue-router`,`vue-resource`,`vuex`
+我们将会选择使用一些vue周边的库 `vue-cli`, `vue-router`,`vue-resource`,`vuex`
 
 > 1.使用vue-cli创建项目
+
 > 2.使用vue-router实现单页路由
+
 > 3.用vuex管理我们的数据流
+
 > 4.使用vue-resource请求我们的node服务端
+
 > 5.使用.vue文件进行组件化的开发
+
 > PS：本文node v6.2.2 npm v3.9.5 vue v2.1.0 vue-router v2.0.3 vuex v2.0.0 
 
 最终我们将会构建出一个小demo，不废话，直接上图。
+
 ![](http://7xim8z.com1.z0.glb.clouddn.com/vue2spa-1.png)
 
 
@@ -687,10 +693,8 @@ var app = new Vue({
 ---
 
 个人网站 ：http://www.meckodo.com
+
 github地址：https://github.com/MeCKodo/vue-tutorial
-
-
-> **知识都不应该是无价的，如果你有收获，请点击下方赞赏**
 
 > Have a nice day
 
